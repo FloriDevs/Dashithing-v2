@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashithing HTML base</title>
+</head>
+<style>
+    body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        background-image: url("https://cdn.pixabay.com/photo/2017/06/25/19/50/sunset-2441776_960_720.jpg");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        color: #fff;
+    }
+
+    header {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    nav {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 5px;
+    }
+
+    .search-form input {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: 1px solid #555;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    button {
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.7);
+        border: 1px solid #555;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: rgba(50, 50, 50, 0.8);
+    }
+
+    main {
+        padding: 20px;
+    }
+
+    section {
+        margin-bottom: 20px;
+        background-color: rgba(0, 0, 0, 0.4);
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    footer, .footer {
+        background-color: rgba(0, 0, 0, 0.6);
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    select,
+    textarea {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        border: 1px solid #555;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #notiz-feld {
+        display: none;
+        margin: 10px 20px;
+    }
+
+    select#city {
+        width: auto;
+        min-width: 150px;
+    }
+
+    .calendar-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .calendar {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .calendar table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .calendar th,
+    .calendar td {
+        padding: 5px;
+        text-align: center;
+    }
+
+    .calendar th {
+        background-color: #555;
+    }
+
+    .calendar-day {
+        width: 100%;
+        padding: 5px;
+        background: transparent;
+        border: none;
+        color: white;
+    }
+
+    .calendar-day.active-day {
+        background-color: #ff4757;
+        font-weight: bold;
+        border-radius: 3px;
+    }
+
+    /* Modal- / Einstellungsfenster-Style */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+    }
+
+    .modal-content {
+        background-color: #222;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 10px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* RSS Sektion */
+    #rss-section {
+        margin-top: 15px;
+        max-height: 150px;
+        overflow-y: auto;
+        background: rgba(0,0,0,0.3);
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .rss-item {
+        margin-bottom: 8px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 4px;
+    }
+    .rss-item a {
+        color: #61afef;
+        text-decoration: none;
+    }
+</style>
+
+<body>
+    <header>
+        <h1 id="title-dash">Dashithing</h1>
+        <nav id="search-nav">
+            </nav>
+    </header>
+
+    <main>
+        <section id="urzeit">
+            <h2 id="lbl-uhrzeit">Uhrzeit</h2>
+            <div id="uhr" style="font-size: 24px; font-weight: bold;"></div>
+        </section>
+
+        <section id="wetter">
+            <h2 id="lbl-wetter">Wetter</h2>
+            <select id="city">
+                </select>
+            <button onclick="getWeather()" id="btn-wetter-abrufen">Abrufen</button>
+            <div id="weather-info" style="margin-top: 10px;"></div>
+        </section>
+    </main>
+
+    <div style="padding: 0 20px;">
+        <button onclick="toggleNotiz()" id="btn-notiz">Notiz</button>
+    </div>
+    <div id="notiz-feld">
+        <textarea id="notiz-text" placeholder="Schreibe deine Notiz hier..."></textarea>
+    </div>
+
+    <div class="footer">
+        <div class="calendar-container">
+            <div id="termin-anzeige" style="width: 100%; max-width: 400px;">
+                <textarea id="termin-text" placeholder="Termine für den ausgewählten Tag (Format für Erinnerung: HH:MM - Text)"></textarea>
+            </div>
+            <div id="monats-navigation">
+                <button onclick="zeigeVorherigenMonat()" id="btn-prev-month">Vorheriger Monat</button>
+                <button onclick="zurueckZuHeute()" id="btn-heute" style="background-color: #2f3542;">Heute</button>
+                <span id="aktueller-monat" style="margin: 0 10px; font-weight: bold;"></span>
+                <button onclick="zeigeNaechstenMonat()" id="btn-next-month">Nächster Monat</button>
+            </div>
+            <div class="calendar">
+                <table>
+                    <thead>
+                        <tr id="calendar-days-header">
+                            <th>So</th><th>Mo</th><th>Di</th><th>Mi</th><th>Do</th><th>Fr</th><th>Sa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendar-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #555; margin: 20px 0;">
+
+        <div>
+            <h3 id="lbl-rss">RSS Feed (Nachrichten)</h3>
+            <div id="rss-section">Lade News...</div>
+        </div>
+
+        <div style="text-align: right; margin-top: 15px;">
+            <button onclick="openSettings()">⚙️ Einstellungen / Settings</button>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSettings()">&times;</span>
+            <h2 id="sett-title">Einstellungen</h2>
+            
+            <label id="sett-lbl-lang">Sprache / Language:</label><br>
+            <select id="sett-lang" onchange="changeLanguage(this.value)">
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+            </select>
+            <br><br>
+
+            <label id="sett-lbl-search">Suchmaschine:</label><br>
+            <select id="sett-search" onchange="changeSearchEngine(this.value)">
+                <option value="ecosia">Ecosia</option>
+                <option value="wikipedia">Wikipedia</option>
+                <option value="google">Google</option>
+            </select>
+            <br><br>
+
+            <label id="sett-lbl-cities">Städte verwalten (Kommagetrennt):</label><br>
+            <textarea id="sett-cities" rows="2" placeholder="Filderstadt, Stuttgart, Berlin..."></textarea>
+            <button onclick="saveCities()" id="sett-btn-save-cities" style="margin-top: 5px;">Städte speichern</button>
+        </div>
+    </div>
+
+    <script>
+        // Standardkonfigurationen via LocalStorage oder Fallbacks
+        let config = {
+            lang: localStorage.getItem('dash_lang') || 'de',
+            search: localStorage.getItem('dash_search') || 'ecosia',
+            cities: localStorage.getItem('dash_cities') ? JSON.parse(localStorage.getItem('dash_cities')) : ["Filderstadt", "Stuttgart", "Esslingen", "Nürtingen", "Berlin", "München", "London"]
+        };
+
+        // Koordinaten-Datenbank erweitern
+        const coordinatesDb = {
+            "Filderstadt": { latitude: 48.68, longitude: 9.22 },
+            "Stuttgart": { latitude: 48.78, longitude: 9.18 },
+            "Esslingen": { latitude: 48.73, longitude: 9.39 },
+            "Nürtingen": { latitude: 48.61, longitude: 9.34 },
+            "Berlin": { latitude: 52.52, longitude: 13.40 },
+            "München": { latitude: 48.13, longitude: 11.58 },
+            "London": { latitude: 51.50, longitude: -0.12 }
+        };
+
+        // Übersetzungen
+        const i18n = {
+            de: {
+                title: "Uhrzeit", wetter: "Wetter", abrufen: "Abrufen", notiz: "Notiz",
+                prev: "Vorheriger Monat", next: "Nächster Monat", heute: "Heute",
+                rss: "RSS Feed (Nachrichten)", settTitle: "Einstellungen", settLang: "Sprache:",
+                settSearch: "Suchmaschine:", settCities: "Städte verwalten (Name eingeben, falls in DB):",
+                saveCities: "Speichern", placeholderNotiz: "Schreibe deine Notiz hier...",
+                placeholderTermin: "Termine für den ausgewählten Tag (Format: HH:MM - Text)",
+                days: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"], loading: "Wird geladen..."
+            },
+            en: {
+                title: "Time", wetter: "Weather", abrufen: "Fetch", notiz: "Note",
+                prev: "Previous Month", next: "Next Month", heute: "Today",
+                rss: "RSS Feed (News)", settTitle: "Settings", settLang: "Language:",
+                settSearch: "Search Engine:", settCities: "Manage Cities (Comma separated):",
+                saveCities: "Save Cities", placeholderNotiz: "Write your note here...",
+                placeholderTermin: "Events for selected day (Format: HH:MM - Text)",
+                days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], loading: "Loading..."
+            }
+        };
+
+        let aktuellesDatum = new Date();
+        let ausgewaehlterTag = aktuellesDatum.getDate();
+        let aktuellerMonat = aktuellesDatum.getMonth();
+        let aktuellesJahr = aktuellesDatum.getFullYear();
+
+        // FIX 1: Notification-Abfrage absichern, damit die WebView hier nicht crasht!
+        try {
+            if (typeof Notification !== 'undefined' && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+        } catch (e) {
+            console.log("Notifications werden von dieser WebView nicht unterstützt.");
+        }
+
+        function initApp() {
+            applyLanguage();
+            buildSearchNav();
+            loadCitiesSelect();
+            aktualisiereKalender();
+            loadRSS();
+            setInterval(updateUhrzeit, 1000);
+            setInterval(checkCalendarReminders, 60000);
+        }
+
+        function applyLanguage() {
+            const lang = config.lang;
+            document.getElementById("lbl-uhrzeit").textContent = i18n[lang].title;
+            document.getElementById("lbl-wetter").textContent = i18n[lang].wetter;
+            document.getElementById("btn-wetter-abrufen").textContent = i18n[lang].abrufen;
+            document.getElementById("btn-notiz").textContent = i18n[lang].notiz;
+            document.getElementById("btn-prev-month").textContent = i18n[lang].prev;
+            document.getElementById("btn-next-month").textContent = i18n[lang].next;
+            document.getElementById("btn-heute").textContent = i18n[lang].heute;
+            document.getElementById("lbl-rss").textContent = i18n[lang].rss;
+            document.getElementById("notiz-text").placeholder = i18n[lang].placeholderNotiz;
+
+            const headerRow = document.getElementById("calendar-days-header");
+            headerRow.innerHTML = i18n[lang].days.map(d => `<th>${d}</th>`).join('');
+
+            document.getElementById("sett-title").textContent = i18n[lang].settTitle;
+            document.getElementById("sett-lbl-lang").textContent = i18n[lang].settLang;
+            document.getElementById("sett-lbl-search").textContent = i18n[lang].settSearch;
+            document.getElementById("sett-lbl-cities").textContent = i18n[lang].settCities;
+            document.getElementById("sett-btn-save-cities").textContent = i18n[lang].saveCities;
+            document.getElementById("sett-lang").value = lang;
+            document.getElementById("sett-search").value = config.search;
+            document.getElementById("sett-cities").value = config.cities.join(", ");
+        }
+
+        function buildSearchNav() {
+            const nav = document.getElementById("search-nav");
+            if (!nav) return;
+            nav.innerHTML = "";
+            let action = "https://www.ecosia.org/search", nameAttr = "q", placeholder = "Ecosia";
+
+            if (config.search === "wikipedia") {
+                action = "https://de.wikipedia.org/wiki/Spezial:Suche";
+                nameAttr = "search";
+                placeholder = "Wikipedia";
+            } else if (config.search === "google") {
+                action = "https://www.google.com/search";
+                nameAttr = "q";
+                placeholder = "Google";
+            }
+
+            nav.innerHTML = `
+                <form class="search-form" action="${action}">
+                    <input type="text" name="${nameAttr}" placeholder="${placeholder}">
+                    <button type="submit">${placeholder}</button>
+                </form>
+            `;
+        }
+
+        function loadCitiesSelect() {
+            const select = document.getElementById("city");
+            if (!select) return;
+            select.innerHTML = "";
+            config.cities.forEach(city => {
+                let opt = document.createElement("option");
+                opt.value = city;
+                opt.textContent = city;
+                select.appendChild(opt);
+            });
+        }
+
+        function aktualisiereKalender() {
+            const calendarBody = document.getElementById("calendar-body");
+            if (!calendarBody) return;
+            calendarBody.innerHTML = "";
+
+            const firstDayOfMonth = new Date(aktuellesJahr, aktuellerMonat, 1).getDay();
+            const daysInMonth = new Date(aktuellesJahr, aktuellerMonat + 1, 0).getDate();
+
+            let day = 1;
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement("tr");
+                for (let j = 0; j < 7; j++) {
+                    if (i === 0 && j < firstDayOfMonth) {
+                        row.innerHTML += "<td></td>";
+                    } else if (day > daysInMonth) {
+                        row.innerHTML += "<td></td>";
+                    } else {
+                        let activeClass = (day === ausgewaehlterTag && aktuellerMonat === new Date().getMonth() && aktuellesJahr === new Date().getFullYear()) ? "active-day" : "";
+                        row.innerHTML += `<td><button class="calendar-day ${activeClass}" data-tag="${day}">${day}</button></td>`;
+                        day++;
+                    }
+                }
+                calendarBody.appendChild(row);
+                if (day > daysInMonth) break;
+            }
+
+            document.getElementById("aktueller-monat").textContent = `${new Date(aktuellesJahr, aktuellerMonat).toLocaleString(config.lang, { month: "long" })} ${aktuellesJahr}`;
+            zeigeTerminFuerTag(ausgewaehlterTag);
+        }
+
+        function zurueckZuHeute() {
+            let heute = new Date();
+            aktuellesJahr = heute.getFullYear();
+            aktuellerMonat = heute.getMonth();
+            ausgewaehlterTag = heute.getDate();
+            aktualisiereKalender();
+        }
+
+        document.getElementById("termin-text").addEventListener("input", function() {
+            speichereTermin(ausgewaehlterTag, this.value);
+        });
+
+        document.getElementById("calendar-body").addEventListener("click", function(event) {
+            if (event.target.classList.contains("calendar-day")) {
+                document.querySelectorAll(".calendar-day").forEach(b => b.classList.remove("active-day"));
+                event.target.classList.add("active-day");
+                zeigeTerminFuerTag(parseInt(event.target.dataset.tag));
+            }
+        });
+
+        function zeigeTerminFuerTag(tag) {
+            ausgewaehlterTag = tag;
+            const monatsName = new Date(aktuellesJahr, aktuellerMonat).toLocaleString(config.lang, { month: 'long' });
+            document.getElementById("termin-text").placeholder = `${tag}. ${monatsName} ${aktuellesJahr} - ${i18n[config.lang].placeholderTermin}`;
+            ladeTermin(tag);
+        }
+
+        function speichereTermin(tag, termin) {
+            localStorage.setItem(`termin_${aktuellesJahr}_${aktuellerMonat}_${tag}`, termin);
+        }
+
+        function ladeTermin(tag) {
+            const val = localStorage.getItem(`termin_${aktuellesJahr}_${aktuellerMonat}_${tag}`) || "";
+            document.getElementById("termin-text").value = val;
+        }
+
+        function zeigeVorherigenMonat() {
+            aktuellerMonat--;
+            if (aktuellerMonat < 0) { aktuellerMonat = 11; aktuellesJahr--; }
+            aktualisiereKalender();
+        }
+
+        function zeigeNaechstenMonat() {
+            aktuellerMonat++;
+            if (aktuellerMonat > 11) { aktuellerMonat = 0; aktuellesJahr++; }
+            aktualisiereKalender();
+        }
+
+        function updateUhrzeit() {
+            const uhr = document.getElementById("uhr");
+            if (!uhr) return;
+            const jetzt = new Date();
+            uhr.textContent = jetzt.toLocaleTimeString(config.lang);
+        }
+
+        function getWeather() {
+            const citySelect = document.getElementById("city");
+            if (!citySelect) return;
+            const city = citySelect.value;
+            const weatherInfo = document.getElementById("weather-info");
+            weatherInfo.innerHTML = i18n[config.lang].loading;
+
+            const coord = coordinatesDb[city] || { latitude: 48.78, longitude: 9.18 };
+
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coord.latitude}&longitude=${coord.longitude}&current_weather=true&hourly=temperature_2m,precipitation,weathercode`)
+                .then(response => response.json())
+                .then(data => {
+                    const temperature = data.current_weather.temperature;
+                    const windspeed = data.current_weather.windspeed;
+                    const weathercode = data.current_weather.weathercode;
+                    const weatherDescription = getWeatherDescription(weathercode);
+                    const windDescription = windspeed > 20 ? (config.lang === 'de' ? "windig" : "windy") : (config.lang === 'de' ? "ruhig" : "calm");
+                    weatherInfo.innerHTML = `
+                        <b>${city}:</b><br>
+                        ${weatherDescription}<br>
+                        Temp: ${temperature}°C<br>
+                        Wind: ${windspeed} m/s (${windDescription})
+                    `;
+                })
+                .catch(() => {
+                    weatherInfo.textContent = "Error loading weather.";
+                });
+        }
+
+        function getWeatherDescription(weathercode) {
+            if (config.lang === 'de') {
+                if (weathercode === 0) return "Klarer Himmel";
+                if (weathercode <= 3) return "Leicht bewölkt";
+                if (weathercode === 45 || weathercode === 48) return "Nebel";
+                if (weathercode <= 55) return "Nieselregen";
+                if (weathercode <= 65) return "Regen";
+                if (weathercode <= 75) return "Schnee";
+                return "Gewitter / Schauer";
+            } else {
+                if (weathercode === 0) return "Clear Sky";
+                if (weathercode <= 3) return "Partly Cloudy";
+                if (weathercode === 45 || weathercode === 48) return "Fog";
+                if (weathercode <= 55) return "Drizzle";
+                if (weathercode <= 65) return "Rain";
+                if (weathercode <= 75) return "Snow";
+                return "Thunderstorm";
+            }
+        }
+
+        function toggleNotiz() {
+            const notizFeld = document.getElementById("notiz-feld");
+            if (notizFeld.style.display === "none" || !notizFeld.style.display) {
+                notizFeld.style.display = "block";
+                document.getElementById("notiz-text").value = localStorage.getItem('dash_notiz') || "";
+            } else {
+                notizFeld.style.display = "none";
+            }
+        }
+
+        document.getElementById("notiz-text").addEventListener("input", function() {
+            localStorage.setItem('dash_notiz', this.value);
+        });
+
+        function loadRSS() {
+    const rssSection = document.getElementById("rss-section");
+    if (!rssSection) return;
+    const feedUrl = "https://www.tagesschau.de/infoservices/alle-meldungen-100~rss2.xml";
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
+
+    // XMLHttpRequest statt fetch() verwenden, um WebView-Blockaden zu umgehen
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", apiUrl, true);
+
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 400) {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (data.status === "ok") {
+                    rssSection.innerHTML = data.items.slice(0, 5).map(item => `
+                        <div class="rss-item">
+                            <a href="${item.link}" target="_blank"><b>${item.title}</b></a>
+                            <p style="margin:2px 0; font-size:12px; color:#ccc;">${item.description.substring(0, 100)}...</p>
+                        </div>
+                    `).join('');
+                } else {
+                    rssSection.textContent = "Fehler beim Laden des Feeds.";
+                }
+            } catch (e) {
+                rssSection.textContent = "Fehler beim Verarbeiten der Feed-Daten.";
+            }
+        } else {
+            rssSection.textContent = "Feed temporär nicht erreichbar.";
+        }
+    };
+
+    xhr.onerror = function() {
+        rssSection.textContent = "Netzwerkfehler beim Laden des Feeds.";
+    };
+
+    xhr.send();
+}
+
+        // FIX 2: Auch hier Try-Catch um die App-interne Benachrichtigung
+        function checkCalendarReminders() {
+            let jetzt = new Date();
+            let h = String(jetzt.getHours()).padStart(2, '0');
+            let m = String(jetzt.getMinutes()).padStart(2, '0');
+            let zeitString = `${h}:${m}`;
+
+            let tagesTermin = localStorage.getItem(`termin_${jetzt.getFullYear()}_${jetzt.getMonth()}_${jetzt.getDate()}`);
+            if (tagesTermin) {
+                let zeilen = tagesTermin.split('\n');
+                zeilen.forEach(zeile => {
+                    if (zeile.startsWith(zeitString)) {
+                        try {
+                            if (typeof Notification !== 'undefined' && Notification.permission === "granted") {
+                                new Notification("Dashithing Kalender-Event!", {
+                                    body: zeile,
+                                    icon: "https://cdn.pixabay.com/photo/2017/06/25/19/50/sunset-2441776_960_720.jpg"
+                                });
+                            }
+                        } catch (e) {
+                            console.log("Senden der Notification fehlgeschlagen.");
+                        }
+                    }
+                });
+            }
+        }
+
+        function openSettings() { document.getElementById("settingsModal").style.display = "block"; }
+        function closeSettings() { document.getElementById("settingsModal").style.display = "none"; }
+
+        function changeLanguage(val) {
+            config.lang = val;
+            localStorage.setItem('dash_lang', val);
+            applyLanguage();
+            aktualisiereKalender();
+        }
+
+        function changeSearchEngine(val) {
+            config.search = val;
+            localStorage.setItem('dash_search', val);
+            buildSearchNav();
+        }
+
+        function saveCities() {
+            let input = document.getElementById("sett-cities").value;
+            let arr = input.split(",").map(c => c.trim()).filter(c => c.length > 0);
+            config.cities = arr;
+            localStorage.setItem('dash_cities', JSON.stringify(arr));
+            loadCitiesSelect();
+            alert("Städte aktualisiert!");
+        }
+
+        window.onclick = function(event) {
+            let modal = document.getElementById("settingsModal");
+            if (event.target == modal) { modal.style.display = "none"; }
+        }
+
+        // Start
+        initApp();
+    </script>
+</body>
+</html>
